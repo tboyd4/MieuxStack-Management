@@ -1,0 +1,32 @@
+{
+  "name": "mieuxstack-management",
+  "version": "1.0.0",
+  "description": "CMS CLI",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tboyd4/MieuxStack-Management.git"
+  },
+  "keywords": [
+    "CMS",
+    "CLI",
+    "Manage",
+    "Employee",
+    "Content"
+  ],
+  "author": "Tyler Boyd",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tboyd4/MieuxStack-Management/issues"
+  },
+  "homepage": "https://github.com/tboyd4/MieuxStack-Management#readme",
+  "dependencies": {
+    "console.table": "^0.10.0",
+    "express": "^4.17.1",
+    "inquirer": "^7.0.5",
+    "mysql": "^2.18.1"
+  }
+}
