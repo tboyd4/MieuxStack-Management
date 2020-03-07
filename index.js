@@ -29,7 +29,7 @@ const mainMenu = () => {
       type: 'list',
       name: 'mainMenu',
       message: 'Select Option',
-      choices: ['Show All Employees', 'Add New Employee', 'Close Program']
+      choices: ['Show All Employees', 'Add New Employee', 'Add New Department', 'Add New Role', 'Close Program']
     }
   ])
   .then(choice => {
@@ -40,6 +40,12 @@ const mainMenu = () => {
           break;
         case 'Add New Employee':
           getNewEmpInfo()
+          break;
+        case 'Add New Department':
+          getNewDeptInfo();
+          break;
+        case 'Add New Role':
+          getNewRoleInfo();
           break;
         case 'Close Program':
           exitMusic();
@@ -79,6 +85,44 @@ const getNewEmpInfo = () => {
     })
 }
 
+const getNewDeptInfo = () => {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "deptName",
+        message: "Name of New Department"
+      }
+    ])
+    .then(responses => {
+      addDepartment(responses.deptName);
+    })
+}
+
+const getNewRoleInfo = () => {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "title",
+        message: "New Job Title"
+      },
+      {
+        type: "input",
+        name: "salary",
+        message: "Yearly Salary for New Job Title"
+      },
+      {
+        type: "input",
+        name: "deptID",
+        message: "Department ID for New Job Title"
+      }
+    ])
+    .then(responses => {
+      addRole(responses.title, responses.salary, responses.deptID);
+    })
+}
+
   // ================================== Query Logic ======================================//
   const selectAll = () => {
     let sqlQuery = 'SELECT employee.id AS "Employee ID", first_name AS "First Name", last_name AS "Last Name", role.title AS "Job Title", department.name AS "Department", role.salary AS "Salary" FROM employee INNER JOIN role ON employee.role_id = role.id INNER JOIN department ON role.department_id = department.id ORDER BY employee.id ASC;'
@@ -100,6 +144,50 @@ const getNewEmpInfo = () => {
       if (err) throw err;
 
       console.log('Employee Successfully Added!!');
+
+      mainMenu();
+
+    });
+  }
+
+  const addDepartment = (deptName) => {
+    let sqlQuery = `INSERT INTO department (name) VALUES ('${deptName}');`
+
+    connection.query(sqlQuery, (err, res) => {
+      if (err) throw err;
+
+      console.log(res);
+
+      console.log(`Department Successfully Added, under Department ID ${res.insertId}!!`);
+
+      inquirer
+       .prompt([
+         {
+           type: 'confirm',
+           name: 'addRoleQ',
+           message: 'Would you like to add your first job title to this department?'
+         }
+       ])
+       .then(res => {
+         if (res.addRoleQ) {
+           getNewRoleInfo();
+         } else {
+           mainMenu();
+         }
+       })
+
+     
+
+    });
+  }
+
+  const addRole = (title, salary, deptID) => {
+    let sqlQuery = `INSERT INTO role (title, salary, department_id) VALUES ('${title}', '${salary}', '${deptID}');`
+
+    connection.query(sqlQuery, (err, res) => {
+      if (err) throw err;
+
+      console.log(`Job Title Successfully Added, under Role ID ${res.insertId}!!`);
 
       mainMenu();
 
