@@ -156,8 +156,6 @@ const getNewRoleInfo = () => {
     connection.query(sqlQuery, (err, res) => {
       if (err) throw err;
 
-      console.log(res);
-
       console.log(`Department Successfully Added, under Department ID ${res.insertId}!!`);
 
       inquirer
