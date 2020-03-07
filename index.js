@@ -23,46 +23,56 @@ connection.connect(function(err) {
 // =================================== Inquirer Logic ====================================//
 const mainMenu = () => {
   inquirer
-  .prompt([
-    {
-      type: 'list',
-      name: 'mainMenu',
-      message: 'Select Option',
-      choices: ['Show All Employees', 'Show Departments', 'Show Job Titles', 'Add New Employee', 'Add New Department', 'Add New Role', 'Update Current Employee Role', 'Close Program']
-    }
-  ])
-  .then(choice => {
-      
-      switch(choice.mainMenu) {
-        case 'Show All Employees':
+    .prompt([
+      {
+        type: "list",
+        name: "mainMenu",
+        message: "Select Option",
+        choices: [
+          "Show All Employees",
+          "Show Departments",
+          "Show Job Titles",
+          "Add New Employee",
+          "Add New Department",
+          "Add New Role",
+          "Update Current Employee Role",
+          "Close Program"
+        ]
+      }
+    ])
+    .then(choice => {
+      switch (choice.mainMenu) {
+        case "Show All Employees":
           selectAll();
           break;
-        case 'Show Departments':
-          selectSpec('department')
+        case "Show Departments":
+          selectSpec("department");
           break;
-        case 'Show Job Titles':
-          selectSpec('role');
+        case "Show Job Titles":
+          selectSpec("role");
           break;
-        case 'Add New Employee':
-          getNewEmpInfo()
+        case "Add New Employee":
+          getNewEmpInfo();
           break;
-        case 'Add New Department':
+        case "Add New Department":
           getNewDeptInfo();
           break;
-        case 'Add New Role':
+        case "Add New Role":
           getNewRoleInfo();
           break;
-        case 'Close Program':
+        case "Close Program":
           exitMusic();
-        case 'Update Current Employee Role':
+        case "Update Current Employee Role":
           getUpdatedEmpRole();
           break;
         default:
-          console.log('There has been an issue. Please call technical support.');
+          console.log(
+            "There has been an issue. Please call technical support."
+          );
           exitMusic();
       }
-  });
-}
+    });
+};
 
 const getNewEmpInfo = () => {
   inquirer
@@ -86,12 +96,17 @@ const getNewEmpInfo = () => {
         type: "input",
         name: "managerID",
         message: "Employee Manager's ID"
-      },
+      }
     ])
     .then(responses => {
-      addEmployee(responses.firstName, responses.lastName, responses.roleID, responses.managerID);
-    })
-}
+      addEmployee(
+        responses.firstName,
+        responses.lastName,
+        responses.roleID,
+        responses.managerID
+      );
+    });
+};
 
 const getNewDeptInfo = () => {
   inquirer
@@ -104,8 +119,8 @@ const getNewDeptInfo = () => {
     ])
     .then(responses => {
       addDepartment(responses.deptName);
-    })
-}
+    });
+};
 
 const getNewRoleInfo = () => {
   inquirer
@@ -128,8 +143,8 @@ const getNewRoleInfo = () => {
     ])
     .then(responses => {
       addRole(responses.title, responses.salary, responses.deptID);
-    })
-}
+    });
+};
 
 const getUpdatedEmpRole = () => {
   inquirer
@@ -147,130 +162,131 @@ const getUpdatedEmpRole = () => {
     ])
     .then(responses => {
       updateEmpRole(responses.empID, responses.newRole);
-    })
-}
+    });
+};
 
-  // ================================== Query Logic ======================================//
-  const selectAll = () => {
-    let sqlQuery = 'SELECT employee.id AS "Employee ID", first_name AS "First Name", last_name AS "Last Name", role.title AS "Job Title", department.name AS "Department", role.salary AS "Salary" FROM employee INNER JOIN role ON employee.role_id = role.id INNER JOIN department ON role.department_id = department.id ORDER BY employee.id ASC;'
+// ================================== Query Logic ======================================//
+const selectAll = () => {
+  let sqlQuery =
+    'SELECT employee.id AS "Employee ID", first_name AS "First Name", last_name AS "Last Name", role.title AS "Job Title", department.name AS "Department", role.salary AS "Salary" FROM employee INNER JOIN role ON employee.role_id = role.id INNER JOIN department ON role.department_id = department.id ORDER BY employee.id ASC;';
+
+  connection.query(sqlQuery, (err, res) => {
+    if (err) throw err;
+
+    console.table(res);
+
+    returnToMain();
+  });
+};
+
+const selectSpec = table => {
+  if (table === "department") {
+    let sqlQuery =
+      'SELECT id AS "Department ID", name AS "Department Name" FROM department;';
 
     connection.query(sqlQuery, (err, res) => {
       if (err) throw err;
 
-      console.table(res)
+      console.table(res);
 
       returnToMain();
+    });
+  } else if (table === "role") {
+    let sqlQuery =
+      'SELECT role.id AS "Role ID", role.title AS "Job Title", role.salary AS "Yearly Salary", department.name AS "Department" FROM role INNER JOIN department ON role.department_id = department.id;;';
 
+    connection.query(sqlQuery, (err, res) => {
+      if (err) throw err;
+
+      console.table(res);
+
+      returnToMain();
     });
   }
+};
 
-  const selectSpec = (table) => {
-    if (table==='department') {
-      let sqlQuery = 'SELECT id AS "Department ID", name AS "Department Name" FROM department;'
+const addEmployee = (firstName, lastName, roleID, managerID = 2) => {
+  let sqlQuery = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${firstName}', '${lastName}', '${roleID}', '${managerID}');`;
 
-      connection.query(sqlQuery, (err, res) => {
-        if (err) throw err;
-  
-        console.table(res)
-  
-        returnToMain();
-  
+  connection.query(sqlQuery, (err, res) => {
+    if (err) throw err;
+
+    console.log("Employee Successfully Added!!");
+
+    mainMenu();
+  });
+};
+
+const addDepartment = deptName => {
+  let sqlQuery = `INSERT INTO department (name) VALUES ('${deptName}');`;
+
+  connection.query(sqlQuery, (err, res) => {
+    if (err) throw err;
+
+    console.log(
+      `Department Successfully Added, under Department ID ${res.insertId}!!`
+    );
+
+    inquirer
+      .prompt([
+        {
+          type: "confirm",
+          name: "addRoleQ",
+          message:
+            "Would you like to add your first job title to this department?"
+        }
+      ])
+      .then(res => {
+        if (res.addRoleQ) {
+          getNewRoleInfo();
+        } else {
+          mainMenu();
+        }
       });
-    } else if (table==='role') {
-      let sqlQuery = 'SELECT role.id AS "Role ID", role.title AS "Job Title", role.salary AS "Yearly Salary", department.name AS "Department" FROM role INNER JOIN department ON role.department_id = department.id;;'
+  });
+};
 
-      connection.query(sqlQuery, (err, res) => {
-        if (err) throw err;
-  
-        console.table(res)
-  
-        returnToMain();
-  
-      });
-    }
-  }
+const addRole = (title, salary, deptID) => {
+  let sqlQuery = `INSERT INTO role (title, salary, department_id) VALUES ('${title}', '${salary}', '${deptID}');`;
 
-  const addEmployee = (firstName, lastName, roleID, managerID=2) => {
-    let sqlQuery = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${firstName}', '${lastName}', '${roleID}', '${managerID}');`
+  connection.query(sqlQuery, (err, res) => {
+    if (err) throw err;
 
-    connection.query(sqlQuery, (err, res) => {
-      if (err) throw err;
+    console.log(
+      `Job Title Successfully Added, under Role ID ${res.insertId}!!`
+    );
 
-      console.log('Employee Successfully Added!!');
+    mainMenu();
+  });
+};
 
-      mainMenu();
+const updateEmpRole = (empID, newRoleID) => {
+  let sqlQuery = `UPDATE employee SET role_id = ${newRoleID} WHERE id = ${empID};`;
 
-    });
-  }
+  connection.query(sqlQuery, (err, res) => {
+    if (err) throw err;
 
-  const addDepartment = (deptName) => {
-    let sqlQuery = `INSERT INTO department (name) VALUES ('${deptName}');`
+    console.log(`Employee Job Title Succesfully Changed!!`);
 
-    connection.query(sqlQuery, (err, res) => {
-      if (err) throw err;
+    mainMenu();
+  });
+};
 
-      console.log(`Department Successfully Added, under Department ID ${res.insertId}!!`);
-
-      inquirer
-       .prompt([
-         {
-           type: 'confirm',
-           name: 'addRoleQ',
-           message: 'Would you like to add your first job title to this department?'
-         }
-       ])
-       .then(res => {
-         if (res.addRoleQ) {
-           getNewRoleInfo();
-         } else {
-           mainMenu();
-         }
-       })
-    });
-  }
-
-  const addRole = (title, salary, deptID) => {
-    let sqlQuery = `INSERT INTO role (title, salary, department_id) VALUES ('${title}', '${salary}', '${deptID}');`
-
-    connection.query(sqlQuery, (err, res) => {
-      if (err) throw err;
-
-      console.log(`Job Title Successfully Added, under Role ID ${res.insertId}!!`);
-
-      mainMenu();
-
-    });
-  }
-
-  const updateEmpRole = (empID, newRoleID) => {
-    let sqlQuery = `UPDATE employee SET role_id = ${newRoleID} WHERE id = ${empID};`
-
-    connection.query(sqlQuery, (err, res) => {
-      if (err) throw err;
-
-      console.log(`Employee Job Title Succesfully Changed!!`);
-
-      mainMenu();
-
-    });
-  }
-  
-
-  // ================================== Misc. Function ===================================//
+// ================================== Misc. Function ===================================//
 const exitMusic = () => {
-  console.log('Saving Database Changes...');
-  console.log('Tucking the Database in.. wishing it sweet dreams...');
-  console.log('Closing Application...');
+  console.log("Saving Database Changes...");
+  console.log("Tucking the Database in.. wishing it sweet dreams...");
+  console.log("Closing Application...");
   process.exit();
-}
+};
 
 const returnToMain = () => {
   inquirer
     .prompt([
       {
-        type: 'confirm',
-        name: 'return',
-        message: 'Would you like to return to the main menu?'
+        type: "confirm",
+        name: "return",
+        message: "Would you like to return to the main menu?"
       }
     ])
     .then(choice => {
@@ -279,12 +295,11 @@ const returnToMain = () => {
       } else {
         exitMusic();
       }
-    })
-}
+    });
+};
 
 //=======================================================================================//
 
 //================ APP START ==================//
 mainMenu(); //=================================//
 //=============================================//
-
