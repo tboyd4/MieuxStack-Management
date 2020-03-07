@@ -39,7 +39,7 @@ const mainMenu = () => {
           selectAll();
           break;
         case 'Add New Employee':
-          console.log('User adding an employee')
+          getNewEmpInfo()
           break;
         case 'Close Program':
           exitMusic();
@@ -48,6 +48,35 @@ const mainMenu = () => {
           exitMusic();
       }
   });
+}
+
+const getNewEmpInfo = () => {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "firstName",
+        message: "Employee First Name"
+      },
+      {
+        type: "input",
+        name: "lastName",
+        message: "Employee Last Name"
+      },
+      {
+        type: "input",
+        name: "roleID",
+        message: "Employee Role ID"
+      },
+      {
+        type: "input",
+        name: "managerID",
+        message: "Employee Manager's ID"
+      },
+    ])
+    .then(responses => {
+      addEmployee(responses.firstName, responses.lastName, responses.roleID, responses.managerID);
+    })
 }
 
   // ================================== Query Logic ======================================//
@@ -60,6 +89,19 @@ const mainMenu = () => {
       console.table(res)
 
       returnToMain();
+
+    });
+  }
+
+  const addEmployee = (firstName, lastName, roleID, managerID=2) => {
+    let sqlQuery = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${firstName}', '${lastName}', '${roleID}', '${managerID}');`
+
+    connection.query(sqlQuery, (err, res) => {
+      if (err) throw err;
+
+      console.log('Employee Successfully Added!!');
+
+      mainMenu();
 
     });
   }
@@ -89,6 +131,8 @@ const returnToMain = () => {
       }
     })
 }
+
+//=======================================================================================//
 
 //================ APP START ==================//
 mainMenu(); //=================================//
