@@ -18,7 +18,6 @@ connection.connect(function(err) {
     console.error("CONNECTION FAILURE : " + err.stack);
     return;
   }
-  console.log("CONNECTION SUCCESS.. Thread ID : " + connection.threadId);
 });
 
 // =================================== Inquirer Logic ====================================//
@@ -29,7 +28,7 @@ const mainMenu = () => {
       type: 'list',
       name: 'mainMenu',
       message: 'Select Option',
-      choices: ['Show All Employees', 'Add New Employee', 'Add New Department', 'Add New Role', 'Close Program']
+      choices: ['Show All Employees', 'Show Departments', 'Show Job Titles', 'Add New Employee', 'Add New Department', 'Add New Role', 'Close Program']
     }
   ])
   .then(choice => {
@@ -37,6 +36,12 @@ const mainMenu = () => {
       switch(choice.mainMenu) {
         case 'Show All Employees':
           selectAll();
+          break;
+        case 'Show Departments':
+          selectSpec('department')
+          break;
+        case 'Show Job Titles':
+          selectSpec('role');
           break;
         case 'Add New Employee':
           getNewEmpInfo()
@@ -135,6 +140,32 @@ const getNewRoleInfo = () => {
       returnToMain();
 
     });
+  }
+
+  const selectSpec = (table) => {
+    if (table==='department') {
+      let sqlQuery = 'SELECT id AS "Department ID", name AS "Department Name" FROM department;'
+
+      connection.query(sqlQuery, (err, res) => {
+        if (err) throw err;
+  
+        console.table(res)
+  
+        returnToMain();
+  
+      });
+    } else if (table==='role') {
+      let sqlQuery = 'SELECT role.id AS "Role ID", role.title AS "Job Title", role.salary AS "Yearly Salary", department.name AS "Department" FROM role INNER JOIN department ON role.department_id = department.id;;'
+
+      connection.query(sqlQuery, (err, res) => {
+        if (err) throw err;
+  
+        console.table(res)
+  
+        returnToMain();
+  
+      });
+    }
   }
 
   const addEmployee = (firstName, lastName, roleID, managerID=2) => {
