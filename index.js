@@ -38,10 +38,13 @@ inquirer
 
   // ================================== Query Logic ======================================//
   const selectAll = () => {
-    connection.query("SELECT * FROM employee", (err, res) => {
+    let sqlQuery = 'SELECT employee.id AS "Employee ID", first_name AS "First Name", last_name AS "Last Name", role.title AS "Job Title", department.name AS "Department", role.salary AS "Salary" FROM employee INNER JOIN role ON employee.role_id = role.id INNER JOIN department ON role.department_id = department.id ORDER BY employee.id ASC;'
+
+    connection.query(sqlQuery, (err, res) => {
       if (err) throw err;
 
       console.table(res)
+
     });
   }
 
