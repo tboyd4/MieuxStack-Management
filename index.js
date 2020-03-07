@@ -20,4 +20,31 @@ connection.connect(function(err) {
   }
   console.log("CONNECTION SUCCESS.. Thread ID : " + connection.threadId);
 });
-// =======================================================================================//
+
+// =================================== Inquirer Logic ====================================//
+inquirer
+  .prompt([
+    {
+      type: 'list',
+      name: 'mainMenu',
+      message: 'Select Option',
+      choices: ['Show All Employees', 'Do Nothing']
+    }
+  ])
+  .then(choice => {
+      console.log("Choice " + choice.mainMenu);
+      selectAll();
+  });
+
+  // ================================== Query Logic ======================================//
+  const selectAll = () => {
+    connection.query("SELECT * FROM employee", (err, res) => {
+      if (err) throw err;
+
+      console.table(res)
+    });
+  }
+
+
+
+
