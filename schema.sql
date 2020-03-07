@@ -1,3 +1,5 @@
+DROP DATABASE [IF EXISTS] database_name;
+
 CREATE DATABASE meuixCMS_DB;
 
 USE meuixCMS_DB;
@@ -24,3 +26,7 @@ CREATE TABLE employee (
     FOREIGN KEY (role_id) REFERENCES role(id),
     FOREIGN KEY (manager_id) REFERENCES employee(id)
 );
+
+INSERT INTO department (name) VALUES ('management'), ('sales'), ('accounting'), ('production');
+INSERT INTO role (title, salary, department_id) VALUES ('CEO', 90000, 1), ('Account Manager', 60000, 2), ('Lead Accountant', 75000, 3), ('Production Coordinator', 35000, 4);
+INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('John', 'Smith', 1, NULL), ('Jack', 'Winters', 2, 1), ('Sarah', 'Day', 3, 1), ('Christa', 'Williams', 4, 2);
