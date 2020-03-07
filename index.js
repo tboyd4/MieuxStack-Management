@@ -28,7 +28,7 @@ const mainMenu = () => {
       type: 'list',
       name: 'mainMenu',
       message: 'Select Option',
-      choices: ['Show All Employees', 'Show Departments', 'Show Job Titles', 'Add New Employee', 'Add New Department', 'Add New Role', 'Close Program']
+      choices: ['Show All Employees', 'Show Departments', 'Show Job Titles', 'Add New Employee', 'Add New Department', 'Add New Role', 'Update Current Employee Role', 'Close Program']
     }
   ])
   .then(choice => {
@@ -54,6 +54,9 @@ const mainMenu = () => {
           break;
         case 'Close Program':
           exitMusic();
+        case 'Update Current Employee Role':
+          getUpdatedEmpRole();
+          break;
         default:
           console.log('There has been an issue. Please call technical support.');
           exitMusic();
@@ -125,6 +128,25 @@ const getNewRoleInfo = () => {
     ])
     .then(responses => {
       addRole(responses.title, responses.salary, responses.deptID);
+    })
+}
+
+const getUpdatedEmpRole = () => {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "empID",
+        message: "Employee ID (of employee changing roles)"
+      },
+      {
+        type: "input",
+        name: "newRole",
+        message: "New Role ID for that Employee"
+      }
+    ])
+    .then(responses => {
+      updateEmpRole(responses.empID, responses.newRole);
     })
 }
 
@@ -204,9 +226,6 @@ const getNewRoleInfo = () => {
            mainMenu();
          }
        })
-
-     
-
     });
   }
 
@@ -222,6 +241,20 @@ const getNewRoleInfo = () => {
 
     });
   }
+
+  const updateEmpRole = (empID, newRoleID) => {
+    let sqlQuery = `UPDATE employee SET role_id = ${newRoleID} WHERE id = ${empID};`
+
+    connection.query(sqlQuery, (err, res) => {
+      if (err) throw err;
+
+      console.log(`Employee Job Title Succesfully Changed!!`);
+
+      mainMenu();
+
+    });
+  }
+  
 
   // ================================== Misc. Function ===================================//
 const exitMusic = () => {
