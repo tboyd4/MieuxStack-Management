@@ -22,19 +22,33 @@ connection.connect(function(err) {
 });
 
 // =================================== Inquirer Logic ====================================//
-inquirer
+const mainMenu = () => {
+  inquirer
   .prompt([
     {
       type: 'list',
       name: 'mainMenu',
       message: 'Select Option',
-      choices: ['Show All Employees', 'Do Nothing']
+      choices: ['Show All Employees', 'Add New Employee', 'Close Program']
     }
   ])
   .then(choice => {
-      console.log("Choice " + choice.mainMenu);
-      selectAll();
+      
+      switch(choice.mainMenu) {
+        case 'Show All Employees':
+          selectAll();
+          break;
+        case 'Add New Employee':
+          console.log('User adding an employee')
+          break;
+        case 'Close Program':
+          exitMusic();
+        default:
+          console.log('There has been an issue. Please call technical support.');
+          exitMusic();
+      }
   });
+}
 
   // ================================== Query Logic ======================================//
   const selectAll = () => {
@@ -45,9 +59,38 @@ inquirer
 
       console.table(res)
 
+      returnToMain();
+
     });
   }
 
+  // ================================== Misc. Function ===================================//
+const exitMusic = () => {
+  console.log('Saving Database Changes...');
+  console.log('Tucking the Database in.. wishing it sweet dreams...');
+  console.log('Closing Application...');
+  process.exit();
+}
 
+const returnToMain = () => {
+  inquirer
+    .prompt([
+      {
+        type: 'confirm',
+        name: 'return',
+        message: 'Would you like to return to the main menu?'
+      }
+    ])
+    .then(choice => {
+      if (choice.return) {
+        mainMenu();
+      } else {
+        exitMusic();
+      }
+    })
+}
 
+//================ APP START ==================//
+mainMenu(); //=================================//
+//=============================================//
 
